@@ -101,7 +101,7 @@ const quickLinks = computed(() => {
             </h3>
           </div>
           <div class="space-y-3 p-4 pt-2 text-sm text-foreground">
-            <p>使用左侧导航或顶部快捷导航可以快速进入常用模块。</p>
+            <p>使用左侧导航可以快速进入常用模块。</p>
             <p>页面级搜索仅会在支持搜索的页面顶部显示。</p>
           </div>
         </div>

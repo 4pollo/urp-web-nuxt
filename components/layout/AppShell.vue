@@ -4,7 +4,6 @@ import { useRoute, useRouter } from 'vue-router';
 import { useColorMode } from '@vueuse/core';
 import {
   CircleUser,
-  Compass,
   Gauge,
   KeyRound,
   LogOut,
@@ -39,7 +38,6 @@ const SIDEBAR_COLLAPSED_STORAGE_KEY = 'app-shell:sidebar-collapsed';
 const mounted = ref(false);
 const sidebarCollapsed = ref(false);
 const mobileSidebarOpen = ref(false);
-const searchOpen = ref(false);
 const logoutDialogOpen = ref(false);
 const logoutPending = ref(false);
 
@@ -165,16 +163,6 @@ function isActiveRoute(href: string) {
           >
             <PanelLeftOpen class="h-4 w-4" />
           </button>
-          <button
-            v-if="!headerCenter"
-            type="button"
-            class="hidden h-10 w-10 items-center justify-center border border-border bg-background text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring lg:inline-flex"
-            aria-label="打开快捷导航"
-            title="快捷导航 (⌘K)"
-            @click="searchOpen = true"
-          >
-            <Compass class="h-4 w-4" />
-          </button>
         </div>
 
         <div v-if="headerCenter" class="flex-1 flex items-center justify-center px-6">
@@ -218,27 +206,14 @@ function isActiveRoute(href: string) {
       </main>
     </div>
 
-    <!-- Logout Confirmation Dialog - Placeholder -->
-    <div v-if="logoutDialogOpen" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50" @click="logoutDialogOpen = false">
-      <div class="bg-card border border-border p-6 max-w-md" @click.stop>
-        <h2 class="text-lg font-semibold mb-2">确认退出登录</h2>
-        <p class="text-sm text-muted-foreground mb-4">退出后将结束当前会话，并返回登录页。</p>
-        <div class="flex gap-2 justify-end">
-          <button
-            class="px-4 py-2 text-sm border border-border hover:bg-accent"
-            @click="logoutDialogOpen = false"
-          >
-            取消
-          </button>
-          <button
-            class="px-4 py-2 text-sm bg-primary text-primary-foreground hover:bg-primary/90"
-            :disabled="logoutPending"
-            @click="handleLogout"
-          >
-            {{ logoutPending ? '退出中...' : '退出登录' }}
-          </button>
-        </div>
-      </div>
-    </div>
+    <!-- Logout Confirmation Dialog -->
+    <ConfirmDialog
+      v-model:open="logoutDialogOpen"
+      title="确认退出登录"
+      description="退出后将结束当前会话，并返回登录页。"
+      confirm-label="退出登录"
+      :pending="logoutPending"
+      @confirm="handleLogout"
+    />
   </div>
 </template>

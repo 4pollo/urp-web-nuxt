@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import { Eye, EyeOff, LockKeyhole } from 'lucide-vue-next';
 import Modal from '~/components/ui/Modal.vue';
 import ModalHeader from '~/components/ui/ModalHeader.vue';
@@ -22,6 +22,15 @@ const showConfirmPassword = ref(false);
 const currentPassword = ref('');
 const newPassword = ref('');
 const confirmPassword = ref('');
+
+const isFormValid = computed(() => {
+  return (
+    currentPassword.value.trim() !== '' &&
+    newPassword.value.length >= 6 &&
+    confirmPassword.value !== '' &&
+    newPassword.value === confirmPassword.value
+  );
+});
 
 function resetForm() {
   currentPassword.value = '';
@@ -197,7 +206,7 @@ function handleOpenChange(value: boolean) {
           <button
             type="submit"
             class="inline-flex h-10 items-center justify-center whitespace-nowrap border border-primary bg-primary px-4 py-2 text-[0.68rem] font-semibold uppercase tracking-[0.08em] text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
-            :disabled="isSubmitting"
+            :disabled="!isFormValid || isSubmitting"
           >
             {{ isSubmitting ? '提交中...' : '确认修改' }}
           </button>
