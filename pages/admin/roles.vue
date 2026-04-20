@@ -198,15 +198,18 @@ async function handlePermissionsSubmit(permissionIds: number[]) {
 
 // 确认删除
 async function handleDeleteConfirmed() {
-  if (!canDeleteRole.value || !selectedDeleteRole.value || deletePending.value) {
+  // 保存引用，防止对话框关闭后被清空
+  const roleToDelete = selectedDeleteRole.value;
+
+  if (!canDeleteRole.value || !roleToDelete || deletePending.value) {
     return;
   }
 
   deletePending.value = true;
-  pendingRoleId.value = selectedDeleteRole.value.id;
+  pendingRoleId.value = roleToDelete.id;
 
   try {
-    await apiRequest(`/api/roles/${selectedDeleteRole.value.id}`, {
+    await apiRequest(`/api/roles/${roleToDelete.id}`, {
       method: 'DELETE',
     });
     toast.success('角色删除成功');

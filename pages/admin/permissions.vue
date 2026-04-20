@@ -135,15 +135,18 @@ async function handlePermissionSubmit(payload: any) {
 
 // 确认删除
 async function handleDeleteConfirmed() {
-  if (!canDeletePermission.value || !selectedDeletePermission.value || deletePending.value) {
+  // 保存引用，防止对话框关闭后被清空
+  const permissionToDelete = selectedDeletePermission.value;
+
+  if (!canDeletePermission.value || !permissionToDelete || deletePending.value) {
     return;
   }
 
   deletePending.value = true;
-  pendingPermissionId.value = selectedDeletePermission.value.id;
+  pendingPermissionId.value = permissionToDelete.id;
 
   try {
-    await apiRequest(`/api/permissions/${selectedDeletePermission.value.id}`, {
+    await apiRequest(`/api/permissions/${permissionToDelete.id}`, {
       method: 'DELETE',
     });
     toast.success('权限删除成功');

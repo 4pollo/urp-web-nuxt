@@ -7,7 +7,6 @@ import {
   AlertDialogTitle,
   AlertDialogDescription,
   AlertDialogCancel,
-  AlertDialogAction,
 } from 'radix-vue';
 import { AlertTriangle } from 'lucide-vue-next';
 
@@ -39,8 +38,7 @@ function handleOpenChange(value: boolean) {
   }
 }
 
-function handleConfirm(event: Event) {
-  event.preventDefault();
+function handleConfirm() {
   if (!props.pending) {
     emit('confirm');
   }
@@ -90,13 +88,14 @@ function handleConfirm(event: Event) {
             >
               {{ props.cancelLabel }}
             </AlertDialogCancel>
-            <AlertDialogAction
+            <button
+              type="button"
               :disabled="props.pending"
               class="inline-flex h-10 items-center justify-center whitespace-nowrap border border-destructive bg-destructive px-4 py-2 text-[0.68rem] font-semibold uppercase tracking-[0.08em] text-destructive-foreground transition-colors hover:bg-destructive/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
               @click="handleConfirm"
             >
               {{ props.pending ? '处理中...' : props.confirmLabel }}
-            </AlertDialogAction>
+            </button>
           </div>
         </div>
       </AlertDialogContent>

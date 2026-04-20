@@ -185,15 +185,18 @@ async function handleUserRolesSubmit(roleIds: number[]) {
 
 // 确认删除
 async function handleDeleteConfirmed() {
-  if (!canDeleteUser.value || !selectedDeleteUser.value || deletePending.value) {
+  // 保存引用，防止对话框关闭后被清空
+  const userToDelete = selectedDeleteUser.value;
+
+  if (!canDeleteUser.value || !userToDelete || deletePending.value) {
     return;
   }
 
   deletePending.value = true;
-  pendingUserId.value = selectedDeleteUser.value.id;
+  pendingUserId.value = userToDelete.id;
 
   try {
-    await apiRequest(`/api/users/${selectedDeleteUser.value.id}`, {
+    await apiRequest(`/api/users/${userToDelete.id}`, {
       method: 'DELETE',
     });
     toast.success('用户删除成功');
