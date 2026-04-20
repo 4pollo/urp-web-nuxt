@@ -91,7 +91,7 @@ function handleOpenChange(value: boolean) {
     </button>
 
     <Dialog :open="open" @update:open="handleOpenChange">
-      <DialogContent>
+      <DialogContent class="sm:max-w-xl">
         <DialogHeader>
           <DialogTitle>修改密码</DialogTitle>
           <DialogDescription>
@@ -100,108 +100,119 @@ function handleOpenChange(value: boolean) {
         </DialogHeader>
 
         <form @submit.prevent="handleSubmit">
-          <div class="space-y-5">
-            <div class="space-y-2">
-              <Label for="current-password">当前密码</Label>
-              <InputGroup>
-                <InputGroupInput
-                  id="current-password"
-                  v-model="currentPassword"
-                  :type="showCurrentPassword ? 'text' : 'password'"
-                  placeholder="请输入当前密码"
-                  required
-                  autocomplete="current-password"
-                />
-                <InputGroupAddon>
-                  <button
-                    class="inline-flex h-8 w-8 items-center justify-center rounded-none text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
-                    type="button"
-                    tabindex="-1"
-                    :aria-label="showCurrentPassword ? '隐藏当前密码' : '显示当前密码'"
-                    @mousedown.prevent
-                    @click="showCurrentPassword = !showCurrentPassword"
-                  >
-                    <EyeOff v-if="showCurrentPassword" :size="14" />
-                    <Eye v-else :size="14" />
-                  </button>
-                </InputGroupAddon>
-              </InputGroup>
+          <div class="space-y-4">
+            <!-- 密码修改表单 -->
+            <div class="border border-border bg-card text-card-foreground">
+              <div class="flex flex-col space-y-1.5 p-4 pb-2">
+                <h3 class="text-[10px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">
+                  密码信息
+                </h3>
+              </div>
+              <div class="space-y-4 p-4 pt-2">
+                <div class="space-y-2">
+                  <Label for="current-password">当前密码</Label>
+                  <InputGroup>
+                    <InputGroupInput
+                      id="current-password"
+                      v-model="currentPassword"
+                      :type="showCurrentPassword ? 'text' : 'password'"
+                      placeholder="请输入当前密码"
+                      required
+                      autocomplete="current-password"
+                    />
+                    <InputGroupAddon>
+                      <button
+                        class="inline-flex h-8 w-8 items-center justify-center rounded-none text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
+                        type="button"
+                        tabindex="-1"
+                        :aria-label="showCurrentPassword ? '隐藏当前密码' : '显示当前密码'"
+                        @mousedown.prevent
+                        @click="showCurrentPassword = !showCurrentPassword"
+                      >
+                        <EyeOff v-if="showCurrentPassword" :size="14" />
+                        <Eye v-else :size="14" />
+                      </button>
+                    </InputGroupAddon>
+                  </InputGroup>
+                </div>
+
+                <div class="space-y-2">
+                  <Label for="new-password">新密码</Label>
+                  <InputGroup>
+                    <InputGroupInput
+                      id="new-password"
+                      v-model="newPassword"
+                      :type="showNewPassword ? 'text' : 'password'"
+                      placeholder="请输入新密码"
+                      required
+                      minlength="6"
+                      autocomplete="new-password"
+                    />
+                    <InputGroupAddon>
+                      <button
+                        class="inline-flex h-8 w-8 items-center justify-center rounded-none text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
+                        type="button"
+                        tabindex="-1"
+                        :aria-label="showNewPassword ? '隐藏新密码' : '显示新密码'"
+                        @mousedown.prevent
+                        @click="showNewPassword = !showNewPassword"
+                      >
+                        <EyeOff v-if="showNewPassword" :size="14" />
+                        <Eye v-else :size="14" />
+                      </button>
+                    </InputGroupAddon>
+                  </InputGroup>
+                  <p class="text-xs text-muted-foreground">新密码长度至少为 6 位</p>
+                </div>
+
+                <div class="space-y-2">
+                  <Label for="confirm-password">确认新密码</Label>
+                  <InputGroup>
+                    <InputGroupInput
+                      id="confirm-password"
+                      v-model="confirmPassword"
+                      :type="showConfirmPassword ? 'text' : 'password'"
+                      placeholder="请再次输入新密码"
+                      required
+                      autocomplete="new-password"
+                    />
+                    <InputGroupAddon>
+                      <button
+                        class="inline-flex h-8 w-8 items-center justify-center rounded-none text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
+                        type="button"
+                        tabindex="-1"
+                        :aria-label="showConfirmPassword ? '隐藏确认密码' : '显示确认密码'"
+                        @mousedown.prevent
+                        @click="showConfirmPassword = !showConfirmPassword"
+                      >
+                        <EyeOff v-if="showConfirmPassword" :size="14" />
+                        <Eye v-else :size="14" />
+                      </button>
+                    </InputGroupAddon>
+                  </InputGroup>
+                </div>
+              </div>
             </div>
 
-            <div class="space-y-2">
-              <Label for="new-password">新密码</Label>
-              <InputGroup>
-                <InputGroupInput
-                  id="new-password"
-                  v-model="newPassword"
-                  :type="showNewPassword ? 'text' : 'password'"
-                  placeholder="请输入新密码"
-                  required
-                  minlength="6"
-                  autocomplete="new-password"
-                />
-                <InputGroupAddon>
-                  <button
-                    class="inline-flex h-8 w-8 items-center justify-center rounded-none text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
-                    type="button"
-                    tabindex="-1"
-                    :aria-label="showNewPassword ? '隐藏新密码' : '显示新密码'"
-                    @mousedown.prevent
-                    @click="showNewPassword = !showNewPassword"
-                  >
-                    <EyeOff v-if="showNewPassword" :size="14" />
-                    <Eye v-else :size="14" />
-                  </button>
-                </InputGroupAddon>
-              </InputGroup>
-              <p class="text-xs text-muted-foreground">新密码长度至少为 6 位</p>
-            </div>
-
-            <div class="space-y-2">
-              <Label for="confirm-password">确认新密码</Label>
-              <InputGroup>
-                <InputGroupInput
-                  id="confirm-password"
-                  v-model="confirmPassword"
-                  :type="showConfirmPassword ? 'text' : 'password'"
-                  placeholder="请再次输入新密码"
-                  required
-                  autocomplete="new-password"
-                />
-                <InputGroupAddon>
-                  <button
-                    class="inline-flex h-8 w-8 items-center justify-center rounded-none text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
-                    type="button"
-                    tabindex="-1"
-                    :aria-label="showConfirmPassword ? '隐藏确认密码' : '显示确认密码'"
-                    @mousedown.prevent
-                    @click="showConfirmPassword = !showConfirmPassword"
-                  >
-                    <EyeOff v-if="showConfirmPassword" :size="14" />
-                    <Eye v-else :size="14" />
-                  </button>
-                </InputGroupAddon>
-              </InputGroup>
+            <!-- 按钮 -->
+            <div class="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+              <button
+                type="button"
+                class="inline-flex h-10 items-center justify-center whitespace-nowrap border border-border bg-background px-4 py-2 text-[0.68rem] font-semibold uppercase tracking-[0.08em] text-foreground transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
+                :disabled="isSubmitting"
+                @click="open = false"
+              >
+                取消
+              </button>
+              <button
+                type="submit"
+                class="inline-flex h-10 items-center justify-center whitespace-nowrap border border-primary bg-primary px-4 py-2 text-[0.68rem] font-semibold uppercase tracking-[0.08em] text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
+                :disabled="!isFormValid || isSubmitting"
+              >
+                {{ isSubmitting ? '提交中...' : '确认修改' }}
+              </button>
             </div>
           </div>
-
-          <DialogFooter class="mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-            <button
-              type="button"
-              class="inline-flex h-10 items-center justify-center whitespace-nowrap border border-border bg-background px-4 py-2 text-[0.68rem] font-semibold uppercase tracking-[0.08em] text-foreground transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
-              :disabled="isSubmitting"
-              @click="open = false"
-            >
-              取消
-            </button>
-            <button
-              type="submit"
-              class="inline-flex h-10 items-center justify-center whitespace-nowrap border border-primary bg-primary px-4 py-2 text-[0.68rem] font-semibold uppercase tracking-[0.08em] text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
-              :disabled="!isFormValid || isSubmitting"
-            >
-              {{ isSubmitting ? '提交中...' : '确认修改' }}
-            </button>
-          </DialogFooter>
         </form>
       </DialogContent>
     </Dialog>

@@ -351,6 +351,14 @@ function handleOpenChange(value: boolean) {
 
               <div class="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
                 <button
+                  type="button"
+                  class="inline-flex h-10 items-center justify-center whitespace-nowrap border border-border bg-background px-4 py-2 text-[0.68rem] font-semibold uppercase tracking-[0.08em] text-foreground transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
+                  :disabled="disableClose"
+                  @click="handleOpenChange(false)"
+                >
+                  取消
+                </button>
+                <button
                   v-if="!permissionsReadOnly"
                   type="button"
                   class="inline-flex h-10 items-center justify-center whitespace-nowrap border border-primary bg-primary px-4 py-2 text-[0.68rem] font-semibold uppercase tracking-[0.08em] text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
