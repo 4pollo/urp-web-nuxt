@@ -1,14 +1,6 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue';
 import { Eye, EyeOff, LockKeyhole } from 'lucide-vue-next';
-import Modal from '~/components/ui/Modal.vue';
-import ModalHeader from '~/components/ui/ModalHeader.vue';
-import ModalTitle from '~/components/ui/ModalTitle.vue';
-import ModalDescription from '~/components/ui/ModalDescription.vue';
-import Label from '~/components/ui/Label.vue';
-import InputGroup from '~/components/ui/InputGroup.vue';
-import InputGroupInput from '~/components/ui/InputGroupInput.vue';
-import InputGroupAddon from '~/components/ui/InputGroupAddon.vue';
 import { apiRequest } from '~/lib/fetcher';
 
 const toast = useToast();
@@ -98,17 +90,17 @@ function handleOpenChange(value: boolean) {
       修改密码
     </button>
 
-    <Modal :open="open" @update:open="handleOpenChange">
-      <ModalHeader>
-        <ModalTitle>修改密码</ModalTitle>
-        <ModalDescription>
-          请输入当前密码并设置新的登录密码。
-        </ModalDescription>
-      </ModalHeader>
+    <Dialog :open="open" @update:open="handleOpenChange">
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>修改密码</DialogTitle>
+          <DialogDescription>
+            请输入当前密码并设置新的登录密码。
+          </DialogDescription>
+        </DialogHeader>
 
-      <form @submit.prevent="handleSubmit">
-        <div class="border border-border bg-card text-card-foreground">
-          <div class="space-y-5 p-4">
+        <form @submit.prevent="handleSubmit">
+          <div class="space-y-5">
             <div class="space-y-2">
               <Label for="current-password">当前密码</Label>
               <InputGroup>
@@ -192,26 +184,26 @@ function handleOpenChange(value: boolean) {
               </InputGroup>
             </div>
           </div>
-        </div>
 
-        <div class="mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-          <button
-            type="button"
-            class="inline-flex h-10 items-center justify-center whitespace-nowrap border border-border bg-background px-4 py-2 text-[0.68rem] font-semibold uppercase tracking-[0.08em] text-foreground transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
-            :disabled="isSubmitting"
-            @click="open = false"
-          >
-            取消
-          </button>
-          <button
-            type="submit"
-            class="inline-flex h-10 items-center justify-center whitespace-nowrap border border-primary bg-primary px-4 py-2 text-[0.68rem] font-semibold uppercase tracking-[0.08em] text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
-            :disabled="!isFormValid || isSubmitting"
-          >
-            {{ isSubmitting ? '提交中...' : '确认修改' }}
-          </button>
-        </div>
-      </form>
-    </Modal>
+          <DialogFooter class="mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+            <button
+              type="button"
+              class="inline-flex h-10 items-center justify-center whitespace-nowrap border border-border bg-background px-4 py-2 text-[0.68rem] font-semibold uppercase tracking-[0.08em] text-foreground transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
+              :disabled="isSubmitting"
+              @click="open = false"
+            >
+              取消
+            </button>
+            <button
+              type="submit"
+              class="inline-flex h-10 items-center justify-center whitespace-nowrap border border-primary bg-primary px-4 py-2 text-[0.68rem] font-semibold uppercase tracking-[0.08em] text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
+              :disabled="!isFormValid || isSubmitting"
+            >
+              {{ isSubmitting ? '提交中...' : '确认修改' }}
+            </button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
   </div>
 </template>

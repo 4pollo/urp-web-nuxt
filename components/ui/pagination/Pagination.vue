@@ -1,17 +1,17 @@
 <script setup lang="ts">
-import { cn } from '~/lib/utils';
+import type { HTMLAttributes } from "vue"
+import { cn } from "@/lib/utils"
 
 interface Props {
-  class?: string;
+  class?: HTMLAttributes["class"]
 }
 
-const props = defineProps<Props>();
+const props = defineProps<Props>()
 </script>
 
 <template>
   <nav
-    role="navigation"
-    aria-label="pagination"
+    data-slot="pagination"
     :class="cn('mx-auto flex w-full justify-center', props.class)"
   >
     <slot />

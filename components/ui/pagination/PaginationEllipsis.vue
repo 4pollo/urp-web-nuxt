@@ -12,7 +12,7 @@ const props = defineProps<Props>();
 <template>
   <span
     :class="cn(
-      'flex h-8 w-8 items-center justify-center text-muted-foreground',
+      'flex h-9 w-9 items-center justify-center text-muted-foreground',
       props.class
     )"
   >

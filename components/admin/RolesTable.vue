@@ -1,12 +1,5 @@
 <script setup lang="ts">
 import { computed } from 'vue';
-import Pagination from '~/components/ui/Pagination.vue';
-import PaginationContent from '~/components/ui/PaginationContent.vue';
-import PaginationItem from '~/components/ui/PaginationItem.vue';
-import PaginationLink from '~/components/ui/PaginationLink.vue';
-import PaginationPrevious from '~/components/ui/PaginationPrevious.vue';
-import PaginationNext from '~/components/ui/PaginationNext.vue';
-import PaginationEllipsis from '~/components/ui/PaginationEllipsis.vue';
 import type { RoleListItem } from '~/lib/types';
 
 interface Props {

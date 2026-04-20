@@ -1,10 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { Eye, EyeOff } from 'lucide-vue-next';
-import Label from '~/components/ui/Label.vue';
-import InputGroup from '~/components/ui/InputGroup.vue';
-import InputGroupInput from '~/components/ui/InputGroupInput.vue';
-import InputGroupAddon from '~/components/ui/InputGroupAddon.vue';
 
 const { login, setError, isSubmitting } = useAuth();
 const toast = useToast();
