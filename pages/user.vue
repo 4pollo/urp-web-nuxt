@@ -6,7 +6,6 @@ import RoleListCard from '~/components/user/RoleListCard.vue';
 import PermissionListCard from '~/components/user/PermissionListCard.vue';
 import ChangePasswordDialog from '~/components/user/ChangePasswordDialog.vue';
 import { apiRequest } from '~/lib/fetcher';
-import { navItems } from '~/lib/capabilities';
 import type { UserDetail } from '~/lib/types';
 
 definePageMeta({
@@ -63,7 +62,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <AppShell :nav-items="navItems">
+  <AppShell>
     <div class="mb-6 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
       <div>
         <h1 class="page-title">用户中心</h1>

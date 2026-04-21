@@ -2,7 +2,7 @@
 import { computed } from 'vue';
 import { CircleUser, KeyRound, Shield, Users } from 'lucide-vue-next';
 import AppShell from '~/components/layout/AppShell.vue';
-import { navItems } from '~/lib/capabilities';
+import { useMenuStore } from '~/stores/menu';
 
 definePageMeta({
   middleware: 'auth'
@@ -12,8 +12,12 @@ useHead({
   title: '控制台 - URP',
 });
 
+const menuStore = useMenuStore();
+
 // 获取管理菜单项
-const adminItems = computed(() => navItems.filter(item => item.permission));
+const adminItems = computed(() => menuStore.navItems.filter(item =>
+  item.href.startsWith('/admin/')
+));
 
 // 快捷链接
 const quickLinks = computed(() => {
@@ -61,7 +65,7 @@ const quickLinks = computed(() => {
 </script>
 
 <template>
-  <AppShell :nav-items="navItems">
+  <AppShell>
     <div class="space-y-6">
       <div class="space-y-2">
         <h1 class="page-title">控制台</h1>

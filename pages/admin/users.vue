@@ -7,7 +7,6 @@ import UserRolesDialog from '~/components/admin/UserRolesDialog.vue';
 import ConfirmDialog from '~/components/common/ConfirmDialog.vue';
 import AdminStats from '~/components/admin/AdminStats.vue';
 import { apiRequest } from '~/lib/fetcher';
-import { navItems } from '~/lib/capabilities';
 import type { UserListItem, UserDetail, RoleListItem } from '~/lib/types';
 
 definePageMeta({
@@ -241,7 +240,6 @@ onMounted(() => {
 
 <template>
   <AppShell
-    :nav-items="navItems"
     :header-center="true"
   >
     <template #headerCenter>

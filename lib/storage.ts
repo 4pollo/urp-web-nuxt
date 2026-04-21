@@ -2,6 +2,7 @@ const ACCESS_TOKEN_KEY = 'accessToken';
 const REFRESH_TOKEN_KEY = 'refreshToken';
 const USER_KEY = 'user';
 const PERMISSIONS_KEY = 'permissions';
+const MENU_CACHE_KEY = 'app:cached-menu';
 const PERMISSIONS_CACHE_DURATION = 30 * 60 * 1000;
 
 function canUseStorage() {
@@ -71,6 +72,7 @@ export function clearSession() {
   window.localStorage.removeItem(REFRESH_TOKEN_KEY);
   window.localStorage.removeItem(USER_KEY);
   window.localStorage.removeItem(PERMISSIONS_KEY);
+  window.localStorage.removeItem(MENU_CACHE_KEY);
 }
 
 export function getCachedPermissions(): StoredPermissions | null {

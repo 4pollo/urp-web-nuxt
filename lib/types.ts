@@ -27,6 +27,20 @@ export type NavItem = {
   href: string;
   label: string;
   permission?: string;
+  icon?: string;
+};
+
+export type MenuItem = {
+  id: number;
+  key: string;
+  menuLabel: string;
+  menuIcon: string;
+  menuPath: string;
+  menuOrder: number;
+};
+
+export type MenuResponse = {
+  items: MenuItem[];
 };
 
 export type UserListItem = {

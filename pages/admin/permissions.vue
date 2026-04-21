@@ -7,7 +7,6 @@ import PermissionEditDialog from '~/components/admin/PermissionEditDialog.vue';
 import ConfirmDialog from '~/components/common/ConfirmDialog.vue';
 import AdminStats from '~/components/admin/AdminStats.vue';
 import { apiRequest } from '~/lib/fetcher';
-import { navItems } from '~/lib/capabilities';
 import type { PermissionItem } from '~/lib/types';
 
 definePageMeta({
@@ -186,7 +185,6 @@ onMounted(() => {
 
 <template>
   <AppShell
-    :nav-items="navItems"
     :header-center="true"
   >
     <template #headerCenter>

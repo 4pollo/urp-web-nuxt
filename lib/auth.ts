@@ -1,6 +1,6 @@
 import { authRequest, apiRequest } from './fetcher';
 import { clearSession, getRefreshToken } from './storage';
-import type { AuthPayload, AuthUser, MyPermissions } from './types';
+import type { AuthPayload, AuthUser, MyPermissions, MenuResponse } from './types';
 
 export function login(email: string, password: string): Promise<AuthPayload> {
   return authRequest('/api/auth/login', { email, password });
@@ -20,6 +20,11 @@ export async function getCurrentUser() {
 
 export async function getMyPermissions() {
   const result = await apiRequest<MyPermissions>('/api/permissions/me');
+  return result.data;
+}
+
+export async function getMyMenu() {
+  const result = await apiRequest<MenuResponse>('/api/permissions/menu');
   return result.data;
 }
 

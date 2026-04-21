@@ -13,20 +13,25 @@ import {
   Shield,
   Sun,
   Users,
+  Circle,
 } from 'lucide-vue-next';
+import * as LucideIcons from 'lucide-vue-next';
 import type { NavItem } from '~/lib/types';
 import { logout } from '~/lib/auth';
 import { cn } from '~/lib/utils';
+import { useMenuStore } from '~/stores/menu';
 
 interface Props {
-  navItems?: NavItem[];
   headerCenter?: boolean;
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  navItems: () => [],
   headerCenter: false,
 });
+
+const menuStore = useMenuStore();
+
+const navItems = computed(() => menuStore.navItems);
 
 const route = useRoute();
 const router = useRouter();
@@ -47,6 +52,7 @@ onMounted(() => {
     const storedValue = window.localStorage.getItem(SIDEBAR_COLLAPSED_STORAGE_KEY);
     sidebarCollapsed.value = storedValue === 'true';
   }
+  menuStore.loadMenu();
 });
 
 watch(sidebarCollapsed, (value) => {
@@ -59,12 +65,21 @@ const activeTheme = computed(() => {
   return mounted.value ? colorMode.value : 'light';
 });
 
-const navIcons: Record<string, any> = {
-  '/dashboard': Gauge,
-  '/admin/users': Users,
-  '/admin/roles': Shield,
-  '/admin/permissions': KeyRound,
-};
+// 动态获取图标组件
+function getNavIcon(iconName?: string) {
+  if (!iconName) return Gauge;
+
+  // 将 kebab-case 转换为 PascalCase
+  // 例如: 'gauge' -> 'Gauge', 'key-round' -> 'KeyRound'
+  const pascalCase = iconName
+    .split('-')
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+    .join('');
+
+  // 从 lucide-vue-next 中获取对应的图标组件
+  const IconComponent = (LucideIcons as any)[pascalCase];
+  return IconComponent || Gauge;
+}
 
 async function handleLogout() {
   logoutPending.value = true;
@@ -143,7 +158,7 @@ function isActiveRoute(href: string) {
               sidebarCollapsed ? 'w-full justify-center px-0' : 'w-full justify-start gap-3 px-4',
             )"
           >
-            <component :is="navIcons[item.href]" class="h-4 w-4 shrink-0" />
+            <component :is="getNavIcon(item.icon)" class="h-4 w-4 shrink-0" />
             <span v-if="!sidebarCollapsed" class="truncate text-xs">{{ item.label }}</span>
           </NuxtLink>
         </nav>
