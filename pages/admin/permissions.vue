@@ -123,6 +123,7 @@ async function handlePermissionSubmit(payload: any) {
         body: JSON.stringify(payload),
       });
       toast.success('权限信息更新成功');
+      selectedEditPermission.value = null;
     }
     await loadPermissions(currentPage.value, currentLimit.value, currentSearch.value);
   } catch (err) {

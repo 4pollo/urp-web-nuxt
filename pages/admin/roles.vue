@@ -159,6 +159,8 @@ async function handleRoleSubmit(payload: { name: string; description: string }) 
         body: JSON.stringify(payload),
       });
       toast.success('角色信息更新成功');
+      selectedEditRole.value = null;
+      selectedRoleDetail.value = null;
     }
     await loadRoles(currentPage.value, currentLimit.value, currentSearch.value);
   } catch (err) {
@@ -182,10 +184,8 @@ async function handlePermissionsSubmit(permissionIds: number[]) {
       body: JSON.stringify({ permissionIds }),
     });
     toast.success('角色权限更新成功');
-
-    // 重新加载角色详情
-    const result = await apiRequest<RoleDetail>(`/api/roles/${selectedEditRole.value.id}`);
-    selectedRoleDetail.value = result.data;
+    selectedEditRole.value = null;
+    selectedRoleDetail.value = null;
 
     await loadRoles(currentPage.value, currentLimit.value, currentSearch.value);
   } catch (err) {
