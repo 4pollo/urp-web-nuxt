@@ -53,9 +53,11 @@ const totals = computed(() => ({
 async function loadPermissions(page: number, limit: number, search: string) {
   loading.value = true;
   try {
-    const result = await apiRequest<{ items: PermissionItem[]; total: number; page: number; limit: number }>(
-      `/api/permissions?page=${page}&limit=${limit}&search=${encodeURIComponent(search)}`
-    );
+    let url = `/api/permissions?page=${page}&limit=${limit}`;
+    if (search) {
+      url += `&search=${encodeURIComponent(search)}`;
+    }
+    const result = await apiRequest<{ items: PermissionItem[]; total: number; page: number; limit: number }>(url);
     permissions.value = result.data;
   } catch (err) {
     toast.error(err instanceof Error ? err.message : '加载权限列表失败');

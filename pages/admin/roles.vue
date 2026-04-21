@@ -59,9 +59,11 @@ const totals = computed(() => ({
 async function loadRoles(page: number, limit: number, search: string) {
   loading.value = true;
   try {
-    const result = await apiRequest<{ items: RoleListItem[]; total: number; page: number; limit: number }>(
-      `/api/roles?page=${page}&limit=${limit}&search=${encodeURIComponent(search)}`
-    );
+    let url = `/api/roles?page=${page}&limit=${limit}`;
+    if (search) {
+      url += `&search=${encodeURIComponent(search)}`;
+    }
+    const result = await apiRequest<{ items: RoleListItem[]; total: number; page: number; limit: number }>(url);
     roles.value = result.data;
   } catch (err) {
     toast.error(err instanceof Error ? err.message : '加载角色列表失败');

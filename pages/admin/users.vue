@@ -58,9 +58,11 @@ const totals = computed(() => ({
 async function loadUsers(page: number, limit: number, search: string) {
   loading.value = true;
   try {
-    const result = await apiRequest<{ items: UserListItem[]; total: number; page: number; limit: number }>(
-      `/api/users?page=${page}&limit=${limit}&search=${encodeURIComponent(search)}`
-    );
+    let url = `/api/users?page=${page}&limit=${limit}`;
+    if (search) {
+      url += `&search=${encodeURIComponent(search)}`;
+    }
+    const result = await apiRequest<{ items: UserListItem[]; total: number; page: number; limit: number }>(url);
     users.value = result.data;
   } catch (err) {
     toast.error(err instanceof Error ? err.message : '加载用户列表失败');
