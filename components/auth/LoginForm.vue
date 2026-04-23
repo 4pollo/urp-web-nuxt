@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { ref } from 'vue';
-import { Eye, EyeOff } from 'lucide-vue-next';
+import { ref, computed, onUnmounted } from 'vue';
+import { Eye, EyeOff, ShieldAlert, Clock } from 'lucide-vue-next';
+import { AccountLockedError, RateLimitedError } from '~/lib/fetcher';
 
 const { login, setError, isSubmitting } = useAuth();
 const toast = useToast();
@@ -9,14 +10,73 @@ const showPassword = ref(false);
 const email = ref('');
 const password = ref('');
 
+type Notice =
+  | { kind: 'locked'; message: string }
+  | { kind: 'rate-limited'; message: string; retryAt: number | null };
+
+const notice = ref<Notice | null>(null);
+const now = ref(Date.now());
+let tickerId: ReturnType<typeof setInterval> | null = null;
+
+function startTicker() {
+  if (tickerId) return;
+  tickerId = setInterval(() => {
+    now.value = Date.now();
+    if (notice.value?.kind === 'rate-limited' && notice.value.retryAt) {
+      if (notice.value.retryAt <= now.value) {
+        notice.value = null;
+      }
+    }
+  }, 1000);
+}
+
+function stopTicker() {
+  if (tickerId) {
+    clearInterval(tickerId);
+    tickerId = null;
+  }
+}
+
+onUnmounted(stopTicker);
+
+const rateLimitCountdown = computed(() => {
+  if (notice.value?.kind !== 'rate-limited' || !notice.value.retryAt) return '';
+  const seconds = Math.max(0, Math.ceil((notice.value.retryAt - now.value) / 1000));
+  if (seconds === 0) return '';
+  if (seconds < 60) return `${seconds} 秒后可重试`;
+  return `${Math.ceil(seconds / 60)} 分钟后可重试`;
+});
+
+const submitDisabled = computed(() => {
+  if (isSubmitting.value) return true;
+  if (notice.value?.kind === 'rate-limited' && notice.value.retryAt) {
+    return notice.value.retryAt > now.value;
+  }
+  return false;
+});
+
 async function handleSubmit() {
   setError(null);
+  notice.value = null;
 
   try {
     await login(email.value, password.value);
     toast.success('登录成功，正在跳转...');
     await navigateTo('/dashboard');
   } catch (err) {
+    if (err instanceof AccountLockedError) {
+      notice.value = { kind: 'locked', message: err.message };
+      return;
+    }
+    if (err instanceof RateLimitedError) {
+      notice.value = {
+        kind: 'rate-limited',
+        message: err.message,
+        retryAt: err.retryAt,
+      };
+      startTicker();
+      return;
+    }
     toast.error(err instanceof Error ? err.message : '登录失败');
   }
 }
@@ -24,6 +84,32 @@ async function handleSubmit() {
 
 <template>
   <form class="space-y-6" @submit.prevent="handleSubmit">
+    <div
+      v-if="notice"
+      :class="[
+        'flex items-start gap-3 border px-4 py-3 text-xs',
+        notice.kind === 'locked'
+          ? 'border-destructive/40 bg-destructive/10 text-destructive'
+          : 'border-amber-500/40 bg-amber-50 text-amber-900 dark:bg-amber-500/10 dark:text-amber-200',
+      ]"
+      role="alert"
+    >
+      <component
+        :is="notice.kind === 'locked' ? ShieldAlert : Clock"
+        :size="16"
+        class="mt-0.5 shrink-0"
+      />
+      <div class="space-y-1">
+        <p class="font-medium leading-relaxed">{{ notice.message }}</p>
+        <p
+          v-if="notice.kind === 'rate-limited' && rateLimitCountdown"
+          class="text-[11px] opacity-80"
+        >
+          {{ rateLimitCountdown }}
+        </p>
+      </div>
+    </div>
+
     <div class="space-y-5">
       <div class="space-y-2">
         <Label for="login-email">邮箱地址</Label>
@@ -67,7 +153,7 @@ async function handleSubmit() {
     <button
       class="inline-flex h-10 w-full items-center justify-center whitespace-nowrap border border-primary bg-primary px-4 py-2 text-[0.68rem] font-semibold uppercase tracking-[0.08em] text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
       type="submit"
-      :disabled="isSubmitting"
+      :disabled="submitDisabled"
     >
       {{ isSubmitting ? '登录中...' : '登录' }}
     </button>

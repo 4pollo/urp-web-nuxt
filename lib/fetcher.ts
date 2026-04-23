@@ -20,6 +20,53 @@ export class ApiError extends Error {
   }
 }
 
+/** 触发了后端限流（HTTP 429） */
+export class RateLimitedError extends ApiError {
+  /** 服务器建议的最早重试时间点（毫秒时间戳），如不可知则为 null */
+  retryAt: number | null;
+
+  constructor(message: string, retryAt: number | null, status = 429) {
+    super(message, 4029, status);
+    this.name = 'RateLimitedError';
+    this.retryAt = retryAt;
+  }
+}
+
+/** 账号因连续失败被临时锁定 */
+export class AccountLockedError extends ApiError {
+  constructor(message: string, status = 401) {
+    super(message, 4001, status);
+    this.name = 'AccountLockedError';
+  }
+}
+
+const ACCOUNT_LOCKED_MARKER = 'Account temporarily locked';
+const ACCOUNT_LOCKED_FRIENDLY =
+  '账号因多次登录失败已被临时锁定，请 15 分钟后再试';
+const RATE_LIMITED_FRIENDLY = '操作过于频繁，请稍后再试';
+
+function isAccountLockedMessage(message: string | undefined): boolean {
+  return !!message && message.includes(ACCOUNT_LOCKED_MARKER);
+}
+
+function parseRetryAfter(header: string | null): number | null {
+  if (!header) return null;
+  const seconds = Number(header);
+  if (Number.isFinite(seconds) && seconds > 0) {
+    return Date.now() + seconds * 1000;
+  }
+  const date = Date.parse(header);
+  return Number.isFinite(date) ? date : null;
+}
+
+function buildRateLimitedMessage(retryAt: number | null): string {
+  if (!retryAt) return RATE_LIMITED_FRIENDLY;
+  const waitSeconds = Math.max(1, Math.ceil((retryAt - Date.now()) / 1000));
+  if (waitSeconds < 60) return `操作过于频繁，请 ${waitSeconds} 秒后再试`;
+  const waitMinutes = Math.ceil(waitSeconds / 60);
+  return `操作过于频繁，请 ${waitMinutes} 分钟后再试`;
+}
+
 function apiUrl(path: string) {
   return `${env.apiBaseUrl}${path}`;
 }
@@ -102,10 +149,19 @@ export async function apiRequest<T>(
     headers,
   });
 
+  if (response.status === 429) {
+    const retryAt = parseRetryAfter(response.headers.get('Retry-After'));
+    throw new RateLimitedError(buildRateLimitedMessage(retryAt), retryAt);
+  }
+
   const result = await parseJson<T>(response);
 
   if (result.code === 0) {
     return result;
+  }
+
+  if (response.status === 401 && isAccountLockedMessage(result.message)) {
+    throw new AccountLockedError(ACCOUNT_LOCKED_FRIENDLY, response.status);
   }
 
   if (result.code === 4001 && init.auth !== false && init.retry !== false) {
@@ -121,8 +177,17 @@ export async function apiRequest<T>(
         ...init,
         headers: retryHeaders,
       });
+
+      if (retryResponse.status === 429) {
+        const retryAt = parseRetryAfter(retryResponse.headers.get('Retry-After'));
+        throw new RateLimitedError(buildRateLimitedMessage(retryAt), retryAt);
+      }
+
       return parseResponse<T>(retryResponse);
-    } catch {
+    } catch (err) {
+      if (err instanceof RateLimitedError || err instanceof AccountLockedError) {
+        throw err;
+      }
       clearSession();
       throw new ApiError('登录状态已失效', 4001, 401);
     }

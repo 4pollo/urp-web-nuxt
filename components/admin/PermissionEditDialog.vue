@@ -31,6 +31,8 @@ const emit = defineEmits<{
   }];
 }>();
 
+const PERMISSION_KEY_PATTERN = /^[a-z][a-z0-9]*:[a-z][a-z0-9-]*$/;
+
 const key = ref('');
 const group = ref('');
 const description = ref('');
@@ -45,6 +47,56 @@ const isCreateMode = computed(() => props.mode === 'create');
 function isSystemPermission(permKey: string): boolean {
   return SYSTEM_PERMISSION_KEYS.includes(permKey as any);
 }
+
+const isExistingSystemPermission = computed(
+  () => !!props.permission && isSystemPermission(props.permission.key),
+);
+
+// 系统权限不允许修改 key/group/description，仅校验菜单字段；
+// 新建或非系统权限需要校验 key 格式
+const keyError = computed(() => {
+  if (isExistingSystemPermission.value) return '';
+  const value = key.value.trim();
+  if (!value) return '权限标识不能为空';
+  if (value.length > 100) return '权限标识不能超过 100 个字符';
+  if (!PERMISSION_KEY_PATTERN.test(value)) {
+    return '格式应为 module:action（小写字母开头，例如 user:read、article:publish）';
+  }
+  return '';
+});
+
+const groupError = computed(() => {
+  if (isExistingSystemPermission.value) return '';
+  const value = group.value.trim();
+  if (!value) return '权限分组不能为空';
+  if (value.length > 50) return '权限分组不能超过 50 个字符';
+  return '';
+});
+
+const menuLabelError = computed(() => {
+  if (!showInMenu.value) return '';
+  if (!menuLabel.value.trim()) return '勾选显示菜单时，菜单文本必填';
+  if (menuLabel.value.trim().length > 100) return '菜单文本不能超过 100 个字符';
+  return '';
+});
+
+const menuPathError = computed(() => {
+  if (!showInMenu.value) return '';
+  const value = menuPath.value.trim();
+  if (!value) return '勾选显示菜单时，菜单路径必填';
+  if (!value.startsWith('/')) return '菜单路径必须以 / 开头';
+  if (value.length > 255) return '菜单路径不能超过 255 个字符';
+  return '';
+});
+
+const isFormValid = computed(() => {
+  return (
+    !keyError.value &&
+    !groupError.value &&
+    !menuLabelError.value &&
+    !menuPathError.value
+  );
+});
 
 // 监听 permission 变化
 watch(() => props.permission, (newPermission) => {
@@ -61,9 +113,10 @@ watch(() => props.permission, (newPermission) => {
 function handleSubmit(event: Event) {
   event.preventDefault();
   if (props.readOnly || props.pending) return;
+  if (!isFormValid.value) return;
 
   // 系统权限只提交菜单配置字段
-  if (props.permission && isSystemPermission(props.permission.key)) {
+  if (isExistingSystemPermission.value) {
     emit('submit', {
       showInMenu: showInMenu.value,
       menuLabel: menuLabel.value.trim(),
@@ -119,9 +172,12 @@ function handleOpenChange(value: boolean) {
                   id="permission-key"
                   v-model="key"
                   required
-                  :disabled="readOnly || pending"
+                  :disabled="readOnly || pending || isExistingSystemPermission"
+                  placeholder="例如：article:publish"
                   class="flex h-11 w-full border border-input bg-background px-4 py-3 text-[13px] text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
                 />
+                <p v-if="keyError" class="text-xs text-destructive">{{ keyError }}</p>
+                <p v-else class="text-xs text-muted-foreground">格式 module:action（小写字母 + 数字 + 短横线）</p>
               </div>
               <div class="space-y-2">
                 <Label for="permission-group">权限分组</Label>
@@ -129,9 +185,10 @@ function handleOpenChange(value: boolean) {
                   id="permission-group"
                   v-model="group"
                   required
-                  :disabled="readOnly || pending"
+                  :disabled="readOnly || pending || isExistingSystemPermission"
                   class="flex h-11 w-full border border-input bg-background px-4 py-3 text-[13px] text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
                 />
+                <p v-if="groupError" class="text-xs text-destructive">{{ groupError }}</p>
               </div>
             </div>
             <div class="space-y-2">
@@ -168,7 +225,7 @@ function handleOpenChange(value: boolean) {
 
             <div v-if="showInMenu" class="grid gap-5 sm:grid-cols-2">
               <div class="space-y-2">
-                <Label for="menu-label">菜单文本</Label>
+                <Label for="menu-label">菜单文本 <span class="text-destructive">*</span></Label>
                 <input
                   id="menu-label"
                   v-model="menuLabel"
@@ -176,6 +233,7 @@ function handleOpenChange(value: boolean) {
                   :disabled="readOnly || pending"
                   class="flex h-11 w-full border border-input bg-background px-4 py-3 text-[13px] text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
                 />
+                <p v-if="menuLabelError" class="text-xs text-destructive">{{ menuLabelError }}</p>
               </div>
               <div class="space-y-2">
                 <Label for="menu-icon">图标标识</Label>
@@ -190,7 +248,7 @@ function handleOpenChange(value: boolean) {
             </div>
             <div v-if="showInMenu" class="grid gap-5 sm:grid-cols-2">
               <div class="space-y-2">
-                <Label for="menu-path">菜单路径</Label>
+                <Label for="menu-path">菜单路径 <span class="text-destructive">*</span></Label>
                 <input
                   id="menu-path"
                   v-model="menuPath"
@@ -198,6 +256,8 @@ function handleOpenChange(value: boolean) {
                   :disabled="readOnly || pending"
                   class="flex h-11 w-full border border-input bg-background px-4 py-3 text-[13px] text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
                 />
+                <p v-if="menuPathError" class="text-xs text-destructive">{{ menuPathError }}</p>
+                <p v-else class="text-xs text-muted-foreground">必须以 / 开头</p>
               </div>
               <div class="space-y-2">
                 <Label for="menu-order">排序</Label>
@@ -227,7 +287,7 @@ function handleOpenChange(value: boolean) {
             v-if="!readOnly"
             type="submit"
             class="inline-flex h-10 items-center justify-center whitespace-nowrap border border-primary bg-primary px-4 py-2 text-[0.68rem] font-semibold uppercase tracking-[0.08em] text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
-            :disabled="pending || !key.trim() || !group.trim()"
+            :disabled="pending || !isFormValid"
           >
             {{ pending ? (isCreateMode ? '创建中...' : '保存中...') : (isCreateMode ? '创建权限' : '保存') }}
           </button>

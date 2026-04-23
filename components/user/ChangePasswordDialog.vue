@@ -15,10 +15,43 @@ const currentPassword = ref('');
 const newPassword = ref('');
 const confirmPassword = ref('');
 
+const PASSWORD_MAX_LENGTH = 72;
+
+const currentPasswordError = computed(() => {
+  if (!currentPassword.value) return '';
+  if (currentPassword.value.length > PASSWORD_MAX_LENGTH) {
+    return `当前密码不能超过 ${PASSWORD_MAX_LENGTH} 个字符`;
+  }
+  return '';
+});
+
+const newPasswordError = computed(() => {
+  if (!newPassword.value) return '';
+  if (newPassword.value.length < 6) return '新密码长度至少为 6 位';
+  if (newPassword.value.length > PASSWORD_MAX_LENGTH) {
+    return `新密码不能超过 ${PASSWORD_MAX_LENGTH} 个字符`;
+  }
+  if (currentPassword.value && newPassword.value === currentPassword.value) {
+    return '新密码不能与当前密码相同';
+  }
+  return '';
+});
+
+const confirmPasswordError = computed(() => {
+  if (!confirmPassword.value) return '';
+  if (confirmPassword.value !== newPassword.value) {
+    return '两次输入的新密码不一致';
+  }
+  return '';
+});
+
 const isFormValid = computed(() => {
   return (
     currentPassword.value.trim() !== '' &&
+    currentPassword.value.length <= PASSWORD_MAX_LENGTH &&
     newPassword.value.length >= 6 &&
+    newPassword.value.length <= PASSWORD_MAX_LENGTH &&
+    newPassword.value !== currentPassword.value &&
     confirmPassword.value !== '' &&
     newPassword.value === confirmPassword.value
   );
@@ -34,18 +67,14 @@ function resetForm() {
 }
 
 async function handleSubmit() {
-  if (!currentPassword.value || !newPassword.value || !confirmPassword.value) {
-    toast.error('请完整填写密码信息');
-    return;
-  }
-
-  if (newPassword.value.length < 6) {
-    toast.error('新密码长度至少为 6 位');
-    return;
-  }
-
-  if (newPassword.value !== confirmPassword.value) {
-    toast.error('两次输入的新密码不一致');
+  if (!isFormValid.value) {
+    if (!currentPassword.value || !newPassword.value || !confirmPassword.value) {
+      toast.error('请完整填写密码信息');
+    } else if (newPasswordError.value) {
+      toast.error(newPasswordError.value);
+    } else if (confirmPasswordError.value) {
+      toast.error(confirmPasswordError.value);
+    }
     return;
   }
 
@@ -55,7 +84,7 @@ async function handleSubmit() {
     await apiRequest('/api/auth/change-password', {
       method: 'POST',
       body: JSON.stringify({
-        currentPassword: currentPassword.value,
+        oldPassword: currentPassword.value,
         newPassword: newPassword.value,
       }),
     });
@@ -118,6 +147,7 @@ function handleOpenChange(value: boolean) {
                       :type="showCurrentPassword ? 'text' : 'password'"
                       placeholder="请输入当前密码"
                       required
+                      :maxlength="PASSWORD_MAX_LENGTH"
                       autocomplete="current-password"
                     />
                     <InputGroupAddon>
@@ -134,6 +164,7 @@ function handleOpenChange(value: boolean) {
                       </button>
                     </InputGroupAddon>
                   </InputGroup>
+                  <p v-if="currentPasswordError" class="text-xs text-destructive">{{ currentPasswordError }}</p>
                 </div>
 
                 <div class="space-y-2">
@@ -146,6 +177,7 @@ function handleOpenChange(value: boolean) {
                       placeholder="请输入新密码"
                       required
                       minlength="6"
+                      :maxlength="PASSWORD_MAX_LENGTH"
                       autocomplete="new-password"
                     />
                     <InputGroupAddon>
@@ -162,7 +194,8 @@ function handleOpenChange(value: boolean) {
                       </button>
                     </InputGroupAddon>
                   </InputGroup>
-                  <p class="text-xs text-muted-foreground">新密码长度至少为 6 位</p>
+                  <p v-if="newPasswordError" class="text-xs text-destructive">{{ newPasswordError }}</p>
+                  <p v-else class="text-xs text-muted-foreground">长度 6-{{ PASSWORD_MAX_LENGTH }} 位，且不能与当前密码相同</p>
                 </div>
 
                 <div class="space-y-2">
@@ -174,6 +207,7 @@ function handleOpenChange(value: boolean) {
                       :type="showConfirmPassword ? 'text' : 'password'"
                       placeholder="请再次输入新密码"
                       required
+                      :maxlength="PASSWORD_MAX_LENGTH"
                       autocomplete="new-password"
                     />
                     <InputGroupAddon>
@@ -190,6 +224,7 @@ function handleOpenChange(value: boolean) {
                       </button>
                     </InputGroupAddon>
                   </InputGroup>
+                  <p v-if="confirmPasswordError" class="text-xs text-destructive">{{ confirmPasswordError }}</p>
                 </div>
               </div>
             </div>
